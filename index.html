@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#f6f4fb" />
+  <title>Idea Map — карта идей</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Личная база идей</p>
+        <h1>Карта идей</h1>
+        <p class="lead">Собирай мысли, визуалы и заметки. Карта покажет кластеры и связи между ними.</p>
+      </div>
+      <div class="top-actions">
+        <span id="syncStatus" class="status">Не подключено</span>
+        <button id="logoutBtn" class="ghost hidden" type="button">Выйти</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="authView" class="auth-shell">
+        <div class="auth-card">
+          <div>
+            <p class="eyebrow">Supabase</p>
+            <h2>Войти в карту</h2>
+            <p class="muted">Идеи хранятся приватно. Доступ к каждой записи ограничен твоим аккаунтом через RLS.</p>
+          </div>
+          <form id="authForm" class="stack">
+            <label>Email<input id="emailInput" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+            <label>Пароль<input id="passwordInput" type="password" autocomplete="current-password" minlength="6" required placeholder="••••••••"></label>
+            <div class="row">
+              <button class="primary" type="submit">Войти</button>
+              <button id="signupBtn" class="secondary" type="button">Создать аккаунт</button>
+            </div>
+            <p id="authMessage" class="message" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section id="workspace" class="workspace hidden">
+        <aside class="sidebar">
+          <section class="panel composer">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">Входящие</p>
+                <h2>Новая идея</h2>
+              </div>
+              <button id="resetFormBtn" class="icon-btn" type="button" title="Очистить форму">↺</button>
+            </div>
+
+            <form id="ideaForm" class="stack">
+              <input id="editingId" type="hidden">
+              <label>Название<input id="titleInput" maxlength="120" required placeholder="Например: собрать город на нитку"></label>
+              <label>Кластер
+                <select id="clusterInput">
+                  <option value="work">Работа / ПравоТех</option>
+                  <option value="ohapka">Охапка</option>
+                  <option value="visual">Визуальные идеи</option>
+                  <option value="personal">Личное</option>
+                  <option value="research">Исследовать</option>
+                  <option value="inbox">Входящие</option>
+                </select>
+              </label>
+              <label>Заметка<textarea id="noteInput" rows="4" placeholder="Что важно не потерять?"></textarea></label>
+              <label>Теги<input id="tagsInput" placeholder="соучастие, ритуал, визуал"></label>
+              <label>Визуальный референс
+                <input id="imageInput" type="file" accept="image/*">
+                <span class="hint">Для MVP картинка сохраняется внутри записи. Лучше до 600 КБ.</span>
+              </label>
+              <button id="saveIdeaBtn" class="primary" type="submit">Сохранить идею</button>
+              <p id="ideaMessage" class="message" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <section class="panel">
+            <p class="eyebrow">Фильтры</p>
+            <label>Поиск<input id="searchInput" type="search" placeholder="Название, заметка или тег"></label>
+            <div id="clusterFilters" class="chips"></div>
+          </section>
+
+          <section class="panel">
+            <p class="eyebrow">Ручная связь</p>
+            <div class="stack">
+              <label>Откуда<select id="linkSource"></select></label>
+              <label>Куда<select id="linkTarget"></select></label>
+              <label>Тип связи
+                <select id="linkType">
+                  <option value="related">связано с</option>
+                  <option value="develops">развивает</option>
+                  <option value="combine">можно объединить</option>
+                  <option value="mechanic">общая механика</option>
+                  <option value="visual">визуальный референс</option>
+                </select>
+              </label>
+              <button id="addLinkBtn" class="secondary" type="button">Добавить связь</button>
+              <p id="linkMessage" class="message" aria-live="polite"></p>
+            </div>
+          </section>
+        </aside>
+
+        <section class="content">
+          <div class="toolbar">
+            <div class="segmented" role="group" aria-label="Режим отображения">
+              <button id="mapModeBtn" class="active" type="button">Карта</button>
+              <button id="cardsModeBtn" type="button">Карточки</button>
+            </div>
+            <div class="toolbar-meta">
+              <span id="ideaCount">0 идей</span>
+              <button id="seedBtn" class="ghost" type="button">Добавить примеры</button>
+            </div>
+          </div>
+
+          <section id="mapView" class="map-panel">
+            <div class="map-info">
+              <div>
+                <p class="eyebrow">Смысловая сеть</p>
+                <h2>Связи между кластерами</h2>
+              </div>
+              <p class="muted">Пунктирные области — кластеры. Серые линии — автоматические связи по общим тегам. Фиолетовые — связи, которые ты добавила вручную.</p>
+            </div>
+            <div id="mapEmpty" class="empty hidden">Добавь первую идею — она появится здесь.</div>
+            <svg id="ideaMap" viewBox="0 0 1200 760" role="img" aria-label="Карта идей"></svg>
+            <div id="selectedPanel" class="selected hidden"></div>
+          </section>
+
+          <section id="cardsView" class="cards-grid hidden"></section>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="cardTemplate">
+    <article class="idea-card">
+      <div class="idea-media"></div>
+      <div class="idea-card-body">
+        <div class="idea-kicker"></div>
+        <h3></h3>
+        <p class="idea-note"></p>
+        <div class="tag-row"></div>
+        <div class="card-actions">
+          <button class="edit-btn secondary" type="button">Изменить</button>
+          <button class="delete-btn ghost danger" type="button">Удалить</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
